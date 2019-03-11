@@ -1,0 +1,32 @@
+{
+  "app": {
+    "secret": "c2VjcmV0"
+  },
+  "database": {
+    "type": "mariadb",
+    "username": "root",
+    "password": "password",
+    "database": "database",
+    "entities": [
+      "lib/*/entities/*.js"
+    ],
+    "synchronize": false,
+    "logging": false,
+    "extra": {
+      "socketPath": "/cloudsql/socketPath"
+    }
+  },
+  "lunchTeam": {
+    "email": "giacomo.trudu@udemy.com",
+    "password": "******"
+  },
+  "algolia": {
+    "applicationId": "applicationId",
+    "apiKey": "apiKey"
+  },
+  "slack": {
+    "appID": "appID",
+    "verificationToken": "verificationToken",
+    "accessToken": "accessToken"
+  }
+}
