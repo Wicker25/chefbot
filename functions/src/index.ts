@@ -28,6 +28,9 @@ import { SlackPlugin } from './slack/plugin';
 
 import * as functions from 'firebase-functions';
 
+const config = functions.config();
+process.env.PURO_PARAMS = Buffer.from(config.puro.params, 'base64').toString();
+
 const puro = new Puro();
 
 puro.install(new CataloguePlugin());

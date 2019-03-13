@@ -7,11 +7,6 @@
   },
   "scripts": {
     "build": "tsc -p .",
-    "serve": "yarn build && firebase serve --only functions",
-    "shell": "yarn build && firebase functions:shell",
-    "start": "yarn shell",
-    "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log",
     "prettify": "prettier --single-quote --write 'src/**/*.ts' 'tests/**/*.ts'",
     "test": "jest"
   },
@@ -20,7 +15,7 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@puro/core": "0.1.0-alpha13",
+    "@puro/core": "0.1.0-alpha14",
     "@slack/client": "^4.10.0",
     "algoliasearch": "^3.32.0",
     "axios": "^0.18.0",

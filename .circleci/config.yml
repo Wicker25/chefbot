@@ -8,19 +8,41 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "functions/yarn.lock" }}
-            - v1-dependencies-
+            - functions-dependencies-{{ checksum "functions/yarn.lock" }}
       - run: |
-          cd functions
-          yarn install
+          cd functions/
+          yarn install --pure-lockfile
           yarn build
       - save_cache:
           paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "functions/yarn.lock" }}
+            - functions/node_modules/
+          key: functions-dependencies-{{ checksum "functions/yarn.lock" }}
+  deploy:
+    docker:
+      - image: circleci/node:8.12.0
+    working_directory: ~/sources
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - functions-dependencies-{{ checksum "functions/yarn.lock" }}
+            - dependencies-{{ checksum "yarn.lock" }}
+      - run: |
+          yarn install --pure-lockfile
+          `yarn bin`/firebase deploy --only functions --project="$FIREBASE_PROJECT_ID" --token="$FIREBASE_DEPLOY_TOKEN"
+      - save_cache:
+          paths:
+            - node_modules/
+          key: dependencies-{{ checksum "yarn.lock" }}
 
 workflows:
   version: 2
-  build_and_test:
+  build_and_deploy:
     jobs:
       - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
