@@ -1,4 +1,4 @@
-# ChefBot
+# ChefBot [![CircleCI](https://circleci.com/gh/Wicker25/chefbot.svg?style=svg)](https://circleci.com/gh/Wicker25/chefbot)
 
 ![slack logo](/docs/slack-logo.png) ![firebase logo](/docs/firebase-logo.png) ![algolia logo](/docs/algolia-logo.png)
 
