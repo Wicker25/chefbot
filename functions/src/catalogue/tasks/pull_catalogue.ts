@@ -25,7 +25,7 @@
 import { CatalogueManager } from '../managers/CatalogueManager';
 import { SearchEngine } from '../managers/SearchEngine';
 
-(async () => {
+export const task = async () => {
   console.log('Updating catalogue ...');
   const manager = new CatalogueManager();
   await manager.pullCatalogue();
@@ -35,4 +35,4 @@ import { SearchEngine } from '../managers/SearchEngine';
   await searchEngine.reindex();
 
   process.exit(0);
-})();
+};

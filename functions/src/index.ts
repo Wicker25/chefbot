@@ -38,3 +38,16 @@ puro.install(new SlackPlugin());
 puro.prepare();
 
 export const handler = functions.https.onRequest(puro.server);
+
+// Daily jobs
+import { task as pullCatalogue } from './catalogue/tasks/pull_catalogue';
+import { task as prepareRatings } from './catalogue/tasks/prepare_ratings';
+
+export const dailyJob = functions.pubsub
+  .topic('daily-job')
+  .onPublish(async () => {
+    await pullCatalogue();
+    await prepareRatings();
+
+    return true;
+  });

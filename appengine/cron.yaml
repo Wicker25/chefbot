@@ -1,0 +1,4 @@
+cron:
+- description: Daily job for ChefBot
+  url: /publish/daily-job
+  schedule: every day 09:00

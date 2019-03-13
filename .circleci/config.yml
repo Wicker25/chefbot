@@ -29,7 +29,7 @@ jobs:
             - dependencies-{{ checksum "yarn.lock" }}
       - run: |
           yarn install --pure-lockfile
-          `yarn bin`/firebase deploy --only functions --project="$FIREBASE_PROJECT_ID" --token="$FIREBASE_DEPLOY_TOKEN"
+          yarn deploy --only functions --project="$FIREBASE_PROJECT_ID" --token="$FIREBASE_DEPLOY_TOKEN"
       - save_cache:
           paths:
             - node_modules/

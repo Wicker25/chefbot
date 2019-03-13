@@ -26,7 +26,7 @@ import { getConnection } from '@puro/core';
 
 import { Product } from '../entities/Product';
 
-(async () => {
+export const task = async () => {
   const connection = await getConnection();
 
   // Reset the product ratings
@@ -90,6 +90,4 @@ import { Product } from '../entities/Product';
       await productRepository.save(product);
     }
   });
-
-  process.exit(0);
-})();
+};
