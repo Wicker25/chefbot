@@ -1,0 +1,26 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8.12.0
+    working_directory: ~/sources
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "functions/yarn.lock" }}
+            - v1-dependencies-
+      - run: |
+          cd functions
+          yarn install
+          yarn build
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "functions/yarn.lock" }}
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
