@@ -1,5 +1,5 @@
 /**
- * @file bot/SlackBot.ts
+ * @file bot/HelpHandler.ts
  *
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
@@ -22,42 +22,25 @@
  * SOFTWARE.
  */
 
-import { configs } from '@puro/core';
+import { EventHandler } from './EventHandler';
 
-import { HelpHandler } from './HelpHandler';
-import { ShowProductHandler } from './ShowProductHandler';
-import { ShowSuggestionsProductsHandler } from './ShowSuggestionsProductsHandler';
-import { RateProductHandler } from './RateProductHandler';
-import { ReactionAddedHandler } from './ReactionAddedHandler';
-import { ReactionRemovedHandler } from './ReactionRemovedHandler';
-
-import { WebClient } from '@slack/client';
-
-export class SlackBot {
-  private client: WebClient;
-
-  private registeredHandlers = [
-    HelpHandler,
-    ShowSuggestionsProductsHandler,
-    ShowProductHandler,
-    RateProductHandler,
-    ReactionAddedHandler,
-    ReactionRemovedHandler
-  ];
-
-  constructor() {
-    this.client = new WebClient(configs.get('slack.accessToken'));
+export class HelpHandler extends EventHandler {
+  static testEvent(event: any) {
+    const { type, text } = event;
+    return type === 'app_mention' && text.match(/help\s*/gi);
   }
 
-  async handleEvent(event: any) {
-    for (let i = 0; i < this.registeredHandlers.length; i++) {
-      const registeredHandler = this.registeredHandlers[i];
+  async execute() {
+    const { channel } = this.event;
 
-      if (registeredHandler.testEvent(event)) {
-        const handler = new registeredHandler(this.client, event);
-        await handler.execute();
-        break;
-      }
-    }
+    await this.postMessage({
+      channel: channel,
+      text:
+        '_All commands_\n\n' +
+        '• *@chefbot show suggestions* - shows the suggestions for today;\n' +
+        '• *@chefbot show <dish>* - shows a dish from the catalogue;\n' +
+        '• *@chefbot rate <dish>* - starts a survey on a dish in the catalogue;\n' +
+        '• *@chefbot help* - shows this message;\n'
+    });
   }
 }

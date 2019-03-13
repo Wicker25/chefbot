@@ -1,5 +1,5 @@
 /**
- * @file bot/ShowMostPopularProductsHandler.ts
+ * @file bot/ShowSuggestionsProductsHandler.ts
  *
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
@@ -27,10 +27,10 @@ import { getRepository } from '@puro/core';
 import { Product } from '../../catalogue/entities/Product';
 import { EventHandler } from './EventHandler';
 
-export class ShowMostPopularProductsHandler extends EventHandler {
+export class ShowSuggestionsProductsHandler extends EventHandler {
   static testEvent(event: any) {
     const { type, text } = event;
-    return type === 'app_mention' && text.match(/\bshow\s+most\s+popular\b/gi);
+    return type === 'app_mention' && text.match(/\bshow\s+suggestions\s*/gi);
   }
 
   async execute() {
