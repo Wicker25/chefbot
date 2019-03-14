@@ -65,7 +65,7 @@ export class ShowSuggestionsProductsHandler extends EventHandler {
   }
 
   private createProductSection(product: Product) {
-    return {
+    const section: any = {
       type: 'section',
       text: {
         type: 'mrkdwn',
@@ -76,12 +76,17 @@ export class ShowSuggestionsProductsHandler extends EventHandler {
           `:stopwatch: ${product.totalDelayed} ~ ` +
           `:snowflake: ${product.totalCold}\n` +
           `${product.description}`
-      },
-      accessory: {
+      }
+    };
+
+    if (product.imageUrl) {
+      section.accessory = {
         type: 'image',
         image_url: product.imageUrl,
         alt_text: 'product picture'
-      }
-    };
+      };
+    }
+
+    return section;
   }
 }
