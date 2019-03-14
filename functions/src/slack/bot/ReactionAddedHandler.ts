@@ -26,6 +26,7 @@ import { getRepository } from '@puro/core';
 
 import { ProductSurvey } from '../../catalogue/entities/ProductSurvey';
 import { ProductReaction } from '../../catalogue/entities/ProductReaction';
+import { Reaction } from './Reaction';
 import { EventHandler } from './EventHandler';
 
 export class ReactionAddedHandler extends EventHandler {
@@ -34,12 +35,12 @@ export class ReactionAddedHandler extends EventHandler {
   }
 
   async execute() {
-    const { user: userId, item, reaction } = this.event;
+    const { user: userId, item, reaction: reactionName } = this.event;
     const { channel: surveyChannel, ts: surveyTs } = item;
 
-    const normalizedReaction = this.normalizeReaction(reaction);
+    const reaction = new Reaction(reactionName);
 
-    if (!normalizedReaction) {
+    if (!reaction.name) {
       return;
     }
 
@@ -58,22 +59,8 @@ export class ReactionAddedHandler extends EventHandler {
     productReaction.product = productSurvey.product;
     productReaction.productSurvey = productSurvey;
     productReaction.userId = userId;
-    productReaction.reaction = reaction;
+    productReaction.reaction = reaction.name;
 
     await productReactionRepository.save(productReaction);
-  }
-
-  private normalizeReaction(reaction: string) {
-    if (['+1', '-1', 'stopwatch', 'snowflake'].includes(reaction)) {
-      return reaction;
-    }
-
-    if (/^\+1(::skin-tone-[1-5])?$/.test(reaction)) {
-      return '+1';
-    }
-
-    if (/^-1(::skin-tone-[1-5])?$/.test(reaction)) {
-      return '-1';
-    }
   }
 }

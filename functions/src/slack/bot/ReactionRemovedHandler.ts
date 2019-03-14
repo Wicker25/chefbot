@@ -26,6 +26,7 @@ import { getRepository } from '@puro/core';
 
 import { ProductSurvey } from '../../catalogue/entities/ProductSurvey';
 import { ProductReaction } from '../../catalogue/entities/ProductReaction';
+import { Reaction } from './Reaction';
 import { EventHandler } from './EventHandler';
 
 export class ReactionRemovedHandler extends EventHandler {
@@ -34,8 +35,14 @@ export class ReactionRemovedHandler extends EventHandler {
   }
 
   async execute() {
-    const { user: userId, item, reaction } = this.event;
+    const { user: userId, item, reaction: reactionName } = this.event;
     const { channel: surveyChannel, ts: surveyTs } = item;
+
+    const reaction = new Reaction(reactionName);
+
+    if (!reaction.name) {
+      return;
+    }
 
     const productSurveyRepository = await getRepository(ProductSurvey);
     const productSurvey = await productSurveyRepository.findOne({
@@ -52,7 +59,7 @@ export class ReactionRemovedHandler extends EventHandler {
       product: productSurvey.product,
       productSurvey: productSurvey,
       userId: userId,
-      reaction: reaction
+      reaction: reaction.name
     });
 
     if (!productReaction) {
