@@ -84,8 +84,10 @@ export const task = async () => {
       product.totalDelayed = productRating.totalDelayed;
       product.totalCold = productRating.totalCold;
 
-      product.rating =
-        (product.totalPositiveReviews / product.totalReviews) * 5.0;
+      if (product.totalReviews) {
+        product.rating =
+          (product.totalPositiveReviews / product.totalReviews) * 5.0;
+      }
 
       await productRepository.save(product);
     }

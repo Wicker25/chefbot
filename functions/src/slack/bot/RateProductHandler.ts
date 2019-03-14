@@ -43,11 +43,6 @@ export class RateProductHandler extends EventHandler {
     const product = await this.searchProduct(description);
     const user = await this.getUser(userId);
 
-    if (!product) {
-      await this.postMessage({ channel: channel, text: 'I didnt find it!' });
-      return;
-    }
-
     if (files) {
       await this.updateProductImage(product, files[0]);
     }

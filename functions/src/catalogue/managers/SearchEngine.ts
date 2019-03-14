@@ -28,6 +28,9 @@ import { Product } from '../entities/Product';
 
 import * as algoliasearch from 'algoliasearch';
 
+export class NoResultsException extends Error {}
+export class TooManyResultsException extends Error {}
+
 export class SearchEngine {
   private client: algoliasearch.Client;
   private productIndex: algoliasearch.Index;
@@ -41,14 +44,22 @@ export class SearchEngine {
     this.productIndex = this.client.initIndex('products');
   }
 
-  async searchProduct(query: string): Promise<Product | undefined> {
+  async searchProduct(query: string): Promise<Product> {
     const results = await this.productIndex.search({ query });
 
-    const firstResult = results.hits[0];
+    if (!results.hits.length) {
+      throw new NoResultsException();
+    }
 
-    if (firstResult) {
+    if (results.hits.length > 1) {
+      throw new TooManyResultsException();
+    }
+
+    try {
       const productRepository = await getRepository(Product);
-      return productRepository.findOne({ id: firstResult.id });
+      return productRepository.findOneOrFail({ id: results.hits[0].id });
+    } catch (e) {
+      throw new NoResultsException();
     }
   }
 

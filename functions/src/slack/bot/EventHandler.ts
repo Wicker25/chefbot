@@ -25,7 +25,14 @@
 import { configs, getRepository } from '@puro/core';
 
 import { Product } from '../../catalogue/entities/Product';
-import { SearchEngine } from '../../catalogue/managers/SearchEngine';
+
+import {
+  SearchEngine,
+  NoResultsException,
+  TooManyResultsException
+} from '../../catalogue/managers/SearchEngine';
+
+export class ExecutionInterruptedException extends Error {}
 
 import { WebClient } from '@slack/client';
 
@@ -53,8 +60,28 @@ export abstract class EventHandler {
     return (response as any).user;
   }
 
-  protected async searchProduct(query: string) {
-    return this.searchEngine.searchProduct(query);
+  protected async searchProduct(query: string): Promise<Product> {
+    try {
+      return await this.searchEngine.searchProduct(query);
+    } catch (e) {
+      const { channel, user: userId } = this.event;
+
+      if (e instanceof NoResultsException) {
+        await this.postMessage({
+          channel: channel,
+          text: `<@${userId}>, I couldn’t find any dish matching that description!`
+        });
+      } else if (e instanceof TooManyResultsException) {
+        await this.postMessage({
+          channel: channel,
+          text:
+            `<@${userId}>, there are too many dishes matching that ` +
+            `description! Be more specific!`
+        });
+      }
+
+      throw new ExecutionInterruptedException();
+    }
   }
 
   protected async saveProduct(product: Product) {

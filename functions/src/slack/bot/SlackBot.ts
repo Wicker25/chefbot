@@ -24,9 +24,10 @@
 
 import { configs } from '@puro/core';
 
+import { ExecutionInterruptedException } from './EventHandler';
 import { HelpHandler } from './HelpHandler';
-import { ShowProductHandler } from './ShowProductHandler';
 import { ShowSuggestionsProductsHandler } from './ShowSuggestionsProductsHandler';
+import { ShowProductHandler } from './ShowProductHandler';
 import { RateProductHandler } from './RateProductHandler';
 import { ReactionAddedHandler } from './ReactionAddedHandler';
 import { ReactionRemovedHandler } from './ReactionRemovedHandler';
@@ -54,8 +55,15 @@ export class SlackBot {
       const registeredHandler = this.registeredHandlers[i];
 
       if (registeredHandler.testEvent(event)) {
-        const handler = new registeredHandler(this.client, event);
-        await handler.execute();
+        try {
+          const handler = new registeredHandler(this.client, event);
+          await handler.execute();
+        } catch (e) {
+          if (!(e instanceof ExecutionInterruptedException)) {
+            throw e;
+          }
+        }
+
         break;
       }
     }

@@ -37,11 +37,6 @@ export class ShowProductHandler extends EventHandler {
 
     const product = await this.searchProduct(description);
 
-    if (!product) {
-      await this.postMessage({ channel: channel, text: 'I didnt find it!' });
-      return;
-    }
-
     await this.postMessage({
       channel: channel,
       text: 'Here is',
