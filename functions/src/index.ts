@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-import { Puro } from '@puro/core';
+import { Puro, configs } from '@puro/core';
 import { CataloguePlugin } from './catalogue/plugin';
 import { SlackPlugin } from './slack/plugin';
 
@@ -43,11 +43,26 @@ export const handler = functions.https.onRequest(puro.server);
 import { task as pullCatalogue } from './catalogue/tasks/pull_catalogue';
 import { task as prepareRatings } from './catalogue/tasks/prepare_ratings';
 
-export const dailyJob = functions.pubsub
+import { SlackBot } from './slack/bot/SlackBot';
+
+export const dailyPullCatalogue = functions.pubsub
   .topic('daily-job')
   .onPublish(async () => {
     await pullCatalogue();
-    await prepareRatings();
 
+    const slackBot = new SlackBot();
+    await slackBot.handleEvent({
+      type: 'app_mention',
+      channel: configs.get('slack.mainChannel'),
+      text: 'show suggestions'
+    });
+
+    return true;
+  });
+
+export const dailyPrepareRatings = functions.pubsub
+  .topic('daily-job')
+  .onPublish(async () => {
+    await prepareRatings();
     return true;
   });

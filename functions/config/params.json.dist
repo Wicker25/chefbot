@@ -27,6 +27,7 @@
   "slack": {
     "appID": "appID",
     "verificationToken": "verificationToken",
-    "accessToken": "accessToken"
+    "accessToken": "accessToken",
+    "mainChannel": "chefbot-channel"
   }
 }

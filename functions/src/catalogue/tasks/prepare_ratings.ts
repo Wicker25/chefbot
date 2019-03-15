@@ -27,6 +27,7 @@ import { getConnection } from '@puro/core';
 import { Product } from '../entities/Product';
 
 export const task = async () => {
+  console.log('Preparing ratings ...');
   const connection = await getConnection();
 
   // Reset the product ratings

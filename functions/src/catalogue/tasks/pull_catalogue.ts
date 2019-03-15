@@ -33,6 +33,4 @@ export const task = async () => {
   console.log('Updating indexes ...');
   const searchEngine = new SearchEngine();
   await searchEngine.reindex();
-
-  process.exit(0);
 };
