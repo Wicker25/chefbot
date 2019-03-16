@@ -54,9 +54,18 @@ export const task = async () => {
     .addSelect('SUM(CASE WHEN pr.reaction = "stopwatch" THEN 1 ELSE 0 END)', 'totalDelayed')
     .addSelect('SUM(CASE WHEN pr.reaction = "snowflake" THEN 1 ELSE 0 END)', 'totalCold')
     .from('product_reaction', 'pr')
+    .where(qb => {
+      const subQuery = qb.subQuery()
+        .select('pr.id')
+        .from('product_reaction', 'pr')
+        .groupBy('pr.productId')
+        .addGroupBy('pr.userId')
+        .addGroupBy('pr.id')
+        .having('pr.createdOn = MAX(createdOn)')
+        .getQuery();
+      return 'pr.id IN ' + subQuery;
+    })
     .groupBy('pr.productId')
-    .addGroupBy('pr.productSurveyId')
-    .addGroupBy('pr.userId')
     .getRawMany();
 
   const productRatingsMap = productRatings.reduce((output, productRating) => {
