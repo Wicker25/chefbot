@@ -36,7 +36,7 @@ export class RateCommandHandler extends EventHandler {
   }
 
   async execute() {
-    const { channel, user: userId, text, files } = this.event;
+    const { channel, ts, user: userId, text, files } = this.event;
 
     const [command, description] = /rate\s+(.*)?/gi.exec(text) as string[];
 
@@ -45,6 +45,13 @@ export class RateCommandHandler extends EventHandler {
 
     if (files) {
       await this.updateProductImage(product, files[0]);
+
+      // Thank the user for the picture
+      await this.client.reactions.add({
+        name: 'thankyou',
+        channel,
+        timestamp: ts
+      });
     }
 
     const response = await this.postMessage({
