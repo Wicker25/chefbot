@@ -43,7 +43,13 @@ export class ShowCommandHandler extends EventHandler {
       attachments: [
         {
           color: '#36a64f',
-          text: `${product.name} by ${product.restaurant.name}`,
+          text:
+            `*${product.name} by ${product.restaurant.name}*\n` +
+            `${':star:'.repeat(product.rating)} ` +
+            `${product.totalReviews} reviews ~ ` +
+            `:stopwatch: ${product.totalDelayed} ~ ` +
+            `:snowflake: ${product.totalCold}\n` +
+            `${product.description}`,
           image_url: product.imageUrl
         }
       ]
