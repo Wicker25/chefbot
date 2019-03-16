@@ -29,7 +29,7 @@ import { ExecutionInterruptedException } from './EventHandler';
 import { HelpCommandHandler } from './HelpCommandHandler';
 import { ShowSuggestionsCommandHandler } from './ShowSuggestionsCommandHandler';
 import { ShowCommandHandler } from './ShowCommandHandler';
-import { RateProductCommandHandler } from './RateProductCommandHandler';
+import { RateCommandHandler } from './RateCommandHandler';
 import { ReactionAddedHandler } from './ReactionAddedHandler';
 import { ReactionRemovedHandler } from './ReactionRemovedHandler';
 
@@ -42,7 +42,7 @@ export class ChefBot {
     HelpCommandHandler,
     ShowSuggestionsCommandHandler,
     ShowCommandHandler,
-    RateProductCommandHandler,
+    RateCommandHandler,
     ReactionAddedHandler,
     ReactionRemovedHandler
   ];

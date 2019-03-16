@@ -1,5 +1,5 @@
 /**
- * @file robot/RateProductCommandHandler.ts
+ * @file robot/RateCommandHandler.ts
  *
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
@@ -29,7 +29,7 @@ import { ProductSurvey } from '../../catalogue/entities/ProductSurvey';
 import { StorageManager } from '../../catalogue/managers/StorageManager';
 import { EventHandler } from './EventHandler';
 
-export class RateProductCommandHandler extends EventHandler {
+export class RateCommandHandler extends EventHandler {
   static testEvent(event: any) {
     const { type, text } = event;
     return type === 'app_mention' && text.match(/rate\s+(.*)?/gi);
