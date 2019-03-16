@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
-import { configs } from '@puro/core';
+import { configs, getConnection } from '@puro/core';
 
 import { ExecutionInterruptedException } from './EventHandler';
+
 import { HelpCommandHandler } from './HelpCommandHandler';
 import { ShowSuggestionsCommandHandler } from './ShowSuggestionsCommandHandler';
 import { ShowCommandHandler } from './ShowCommandHandler';
@@ -55,18 +56,33 @@ export class ChefBot {
       const registeredHandler = this.registeredHandlers[i];
 
       if (registeredHandler.testEvent(event)) {
-        try {
-          const handler = new registeredHandler(this.client, event);
-          await handler.execute();
-        } catch (e) {
-          if (!(e instanceof ExecutionInterruptedException)) {
-            throw e;
-          }
-          break;
-        }
-
+        await this.execEventHandler(event, registeredHandler);
         break;
       }
+    }
+  }
+
+  private async execEventHandler(event: any, handlerClass: any) {
+    const { type, channel, ts } = event;
+
+    try {
+      // Grant single access to the event
+      const connection = await getConnection();
+      await connection
+        .createQueryBuilder()
+        .insert()
+        .into('handled_event')
+        .values({ id: `${type}:${channel}:${ts}`, createdOn: () => 'NOW()' })
+        .execute();
+
+      const handler = new handlerClass(this.client, event);
+      await handler.execute();
+    } catch (e) {
+      if (e instanceof ExecutionInterruptedException) {
+        return;
+      }
+
+      throw e;
     }
   }
 }
