@@ -33,6 +33,8 @@ import { RateCommandHandler } from './RateCommandHandler';
 import { ReactionAddedHandler } from './ReactionAddedHandler';
 import { ReactionRemovedHandler } from './ReactionRemovedHandler';
 
+import { QueryFailedError } from 'typeorm';
+
 import { WebClient } from '@slack/client';
 
 export class ChefBot {
@@ -67,18 +69,23 @@ export class ChefBot {
 
     try {
       // Grant single access to the event
-      const connection = await getConnection();
-      await connection
-        .createQueryBuilder()
-        .insert()
-        .into('handled_event')
-        .values({ id: `${type}:${channel}:${ts}`, createdOn: () => 'NOW()' })
-        .execute();
+      if (type === 'app_mention') {
+        const connection = await getConnection();
+        await connection
+          .createQueryBuilder()
+          .insert()
+          .into('handled_event')
+          .values({ id: `${type}:${channel}:${ts}`, createdOn: () => 'NOW()' })
+          .execute();
+      }
 
       const handler = new handlerClass(this.client, event);
       await handler.execute();
     } catch (e) {
-      if (e instanceof ExecutionInterruptedException) {
+      if (
+        e instanceof QueryFailedError ||
+        e instanceof ExecutionInterruptedException
+      ) {
         return;
       }
 
