@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-import { SlackEventController } from './controllers/SlackEventController';
+import { EventController } from './controllers/EventController';
 
 import { Plugin } from '@puro/core';
 
@@ -31,7 +31,7 @@ export class SlackPlugin extends Plugin {
     return [
       {
         path: '/chefbot/event',
-        controller: SlackEventController,
+        controller: EventController,
         anonymous: true
       }
     ];

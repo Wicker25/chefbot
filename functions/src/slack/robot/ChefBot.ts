@@ -1,5 +1,5 @@
 /**
- * @file bot/SlackBot.ts
+ * @file robot/ChefBot.ts
  *
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
@@ -25,23 +25,23 @@
 import { configs } from '@puro/core';
 
 import { ExecutionInterruptedException } from './EventHandler';
-import { HelpHandler } from './HelpHandler';
-import { ShowSuggestionsProductsHandler } from './ShowSuggestionsProductsHandler';
-import { ShowProductHandler } from './ShowProductHandler';
-import { RateProductHandler } from './RateProductHandler';
+import { HelpCommandHandler } from './HelpCommandHandler';
+import { ShowSuggestionsCommandHandler } from './ShowSuggestionsCommandHandler';
+import { ShowCommandHandler } from './ShowCommandHandler';
+import { RateProductCommandHandler } from './RateProductCommandHandler';
 import { ReactionAddedHandler } from './ReactionAddedHandler';
 import { ReactionRemovedHandler } from './ReactionRemovedHandler';
 
 import { WebClient } from '@slack/client';
 
-export class SlackBot {
+export class ChefBot {
   private client: WebClient;
 
   private registeredHandlers = [
-    HelpHandler,
-    ShowSuggestionsProductsHandler,
-    ShowProductHandler,
-    RateProductHandler,
+    HelpCommandHandler,
+    ShowSuggestionsCommandHandler,
+    ShowCommandHandler,
+    RateProductCommandHandler,
     ReactionAddedHandler,
     ReactionRemovedHandler
   ];
@@ -62,6 +62,7 @@ export class SlackBot {
           if (!(e instanceof ExecutionInterruptedException)) {
             throw e;
           }
+          break;
         }
 
         break;

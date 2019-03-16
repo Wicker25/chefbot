@@ -1,5 +1,5 @@
 /**
- * @file bot/ReactionRemovedHandler.ts
+ * @file robot/ReactionAddedHandler.ts
  *
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
@@ -26,19 +26,19 @@ import { getRepository } from '@puro/core';
 
 import { ProductSurvey } from '../../catalogue/entities/ProductSurvey';
 import { ProductReaction } from '../../catalogue/entities/ProductReaction';
-import { Reaction } from './Reaction';
+import { ReactionAdapter } from './ReactionAdapter';
 import { EventHandler } from './EventHandler';
 
-export class ReactionRemovedHandler extends EventHandler {
+export class ReactionAddedHandler extends EventHandler {
   static testEvent(event: any) {
-    return event.type === 'reaction_removed';
+    return event.type === 'reaction_added';
   }
 
   async execute() {
     const { user: userId, item, reaction: reactionName } = this.event;
     const { channel: surveyChannel, ts: surveyTs } = item;
 
-    const reaction = new Reaction(reactionName);
+    const reaction = new ReactionAdapter(reactionName);
 
     if (!reaction.name) {
       return;
@@ -55,17 +55,12 @@ export class ReactionRemovedHandler extends EventHandler {
 
     const productReactionRepository = await getRepository(ProductReaction);
 
-    const productReaction = await productReactionRepository.findOne({
-      product: productSurvey.product,
-      productSurvey: productSurvey,
-      userId: userId,
-      reaction: reaction.name
-    });
+    const productReaction = new ProductReaction();
+    productReaction.product = productSurvey.product;
+    productReaction.productSurvey = productSurvey;
+    productReaction.userId = userId;
+    productReaction.reaction = reaction.name;
 
-    if (!productReaction) {
-      return;
-    }
-
-    await productReactionRepository.remove(productReaction);
+    await productReactionRepository.save(productReaction);
   }
 }

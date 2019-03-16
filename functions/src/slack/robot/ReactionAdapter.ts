@@ -1,5 +1,5 @@
 /**
- * @file bot/Reaction.ts
+ * @file robot/ReactionAdapter.ts
  *
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-export class Reaction {
+export class ReactionAdapter {
   readonly name?: '+1' | '-1' | 'stopwatch' | 'snowflake';
 
   constructor(name: string) {

@@ -1,5 +1,5 @@
 /**
- * @file bot/ReactionAddedHandler.ts
+ * @file robot/HelpCommandHandler.ts
  *
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
@@ -22,45 +22,25 @@
  * SOFTWARE.
  */
 
-import { getRepository } from '@puro/core';
-
-import { ProductSurvey } from '../../catalogue/entities/ProductSurvey';
-import { ProductReaction } from '../../catalogue/entities/ProductReaction';
-import { Reaction } from './Reaction';
 import { EventHandler } from './EventHandler';
 
-export class ReactionAddedHandler extends EventHandler {
+export class HelpCommandHandler extends EventHandler {
   static testEvent(event: any) {
-    return event.type === 'reaction_added';
+    const { type, text } = event;
+    return type === 'app_mention' && text.match(/help\s*/gi);
   }
 
   async execute() {
-    const { user: userId, item, reaction: reactionName } = this.event;
-    const { channel: surveyChannel, ts: surveyTs } = item;
+    const { channel } = this.event;
 
-    const reaction = new Reaction(reactionName);
-
-    if (!reaction.name) {
-      return;
-    }
-
-    const productSurveyRepository = await getRepository(ProductSurvey);
-    const productSurvey = await productSurveyRepository.findOne({
-      messageId: `${surveyChannel}:${surveyTs}`
+    await this.postMessage({
+      channel: channel,
+      text:
+        '_All commands_\n\n' +
+        '• *@chefbot show suggestions* - shows the suggestions for today;\n' +
+        '• *@chefbot show <dish>* - shows a dish from the catalogue;\n' +
+        '• *@chefbot rate <dish>* - starts a survey on a dish in the catalogue;\n' +
+        '• *@chefbot help* - shows this message;\n'
     });
-
-    if (!productSurvey) {
-      return;
-    }
-
-    const productReactionRepository = await getRepository(ProductReaction);
-
-    const productReaction = new ProductReaction();
-    productReaction.product = productSurvey.product;
-    productReaction.productSurvey = productSurvey;
-    productReaction.userId = userId;
-    productReaction.reaction = reaction.name;
-
-    await productReactionRepository.save(productReaction);
   }
 }

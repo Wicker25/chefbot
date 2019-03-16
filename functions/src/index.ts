@@ -43,15 +43,15 @@ export const handler = functions.https.onRequest(puro.server);
 import { task as pullCatalogue } from './catalogue/tasks/pull_catalogue';
 import { task as prepareRatings } from './catalogue/tasks/prepare_ratings';
 
-import { SlackBot } from './slack/bot/SlackBot';
+import { ChefBot } from './slack/robot/ChefBot';
 
 export const dailyPullCatalogue = functions.pubsub
   .topic('daily-job')
   .onPublish(async () => {
     await pullCatalogue();
 
-    const slackBot = new SlackBot();
-    await slackBot.handleEvent({
+    const chefBot = new ChefBot();
+    await chefBot.handleEvent({
       type: 'app_mention',
       channel: configs.get('slack.mainChannel'),
       text: 'show suggestions'

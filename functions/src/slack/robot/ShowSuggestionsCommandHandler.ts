@@ -1,5 +1,5 @@
 /**
- * @file bot/ShowSuggestionsProductsHandler.ts
+ * @file robot/ShowSuggestionsCommandHandler.ts
  *
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
@@ -27,7 +27,7 @@ import { getRepository } from '@puro/core';
 import { Product } from '../../catalogue/entities/Product';
 import { EventHandler } from './EventHandler';
 
-export class ShowSuggestionsProductsHandler extends EventHandler {
+export class ShowSuggestionsCommandHandler extends EventHandler {
   static testEvent(event: any) {
     const { type, text } = event;
     return type === 'app_mention' && text.match(/\bshow\s+suggestions\s*/gi);

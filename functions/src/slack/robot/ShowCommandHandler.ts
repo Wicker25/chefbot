@@ -1,5 +1,5 @@
 /**
- * @file bot/ShowProductHandler.ts
+ * @file robot/ShowCommandHandler.ts
  *
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
@@ -24,7 +24,7 @@
 
 import { EventHandler } from './EventHandler';
 
-export class ShowProductHandler extends EventHandler {
+export class ShowCommandHandler extends EventHandler {
   static testEvent(event: any) {
     const { type, text } = event;
     return type === 'app_mention' && text.match(/show\s+(.*)?/gi);

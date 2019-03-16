@@ -1,5 +1,5 @@
 /**
- * @file bot/EventHandler.ts
+ * @file robot/EventHandler.ts
  *
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
@@ -54,6 +54,8 @@ export abstract class EventHandler {
     this.searchEngine = new SearchEngine();
     this.event = event;
   }
+
+  abstract async execute(): Promise<void>;
 
   protected async getUser(userId: string) {
     const response = await this.client.users.info({ user: userId });

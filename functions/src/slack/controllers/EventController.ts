@@ -1,5 +1,5 @@
 /**
- * @file controllers/SlackEventController.ts
+ * @file controllers/EventController.ts
  *
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
@@ -22,12 +22,11 @@
  * SOFTWARE.
  */
 
-import { Controller, Request, Response } from '@puro/core';
-import { configs } from '@puro/core';
+import { configs, Controller, Request, Response } from '@puro/core';
 
-import { SlackBot } from '../bot/SlackBot';
+import { ChefBot } from '../robot/ChefBot';
 
-export class SlackEventController extends Controller {
+export class EventController extends Controller {
   async create(request: Request, response: Response) {
     const { type } = request.bucket;
 
@@ -45,8 +44,8 @@ export class SlackEventController extends Controller {
       case 'event_callback': {
         const { event } = request.bucket;
 
-        const chefbot = new SlackBot();
-        await chefbot.handleEvent(event);
+        const chefBot = new ChefBot();
+        await chefBot.handleEvent(event);
 
         response.send('Ok');
         break;

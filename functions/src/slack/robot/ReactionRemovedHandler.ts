@@ -1,5 +1,5 @@
 /**
- * @file bot/HelpHandler.ts
+ * @file robot/ReactionRemovedHandler.ts
  *
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
@@ -22,25 +22,50 @@
  * SOFTWARE.
  */
 
+import { getRepository } from '@puro/core';
+
+import { ProductSurvey } from '../../catalogue/entities/ProductSurvey';
+import { ProductReaction } from '../../catalogue/entities/ProductReaction';
+import { ReactionAdapter } from './ReactionAdapter';
 import { EventHandler } from './EventHandler';
 
-export class HelpHandler extends EventHandler {
+export class ReactionRemovedHandler extends EventHandler {
   static testEvent(event: any) {
-    const { type, text } = event;
-    return type === 'app_mention' && text.match(/help\s*/gi);
+    return event.type === 'reaction_removed';
   }
 
   async execute() {
-    const { channel } = this.event;
+    const { user: userId, item, reaction: reactionName } = this.event;
+    const { channel: surveyChannel, ts: surveyTs } = item;
 
-    await this.postMessage({
-      channel: channel,
-      text:
-        '_All commands_\n\n' +
-        '• *@chefbot show suggestions* - shows the suggestions for today;\n' +
-        '• *@chefbot show <dish>* - shows a dish from the catalogue;\n' +
-        '• *@chefbot rate <dish>* - starts a survey on a dish in the catalogue;\n' +
-        '• *@chefbot help* - shows this message;\n'
+    const reaction = new ReactionAdapter(reactionName);
+
+    if (!reaction.name) {
+      return;
+    }
+
+    const productSurveyRepository = await getRepository(ProductSurvey);
+    const productSurvey = await productSurveyRepository.findOne({
+      messageId: `${surveyChannel}:${surveyTs}`
     });
+
+    if (!productSurvey) {
+      return;
+    }
+
+    const productReactionRepository = await getRepository(ProductReaction);
+
+    const productReaction = await productReactionRepository.findOne({
+      product: productSurvey.product,
+      productSurvey: productSurvey,
+      userId: userId,
+      reaction: reaction.name
+    });
+
+    if (!productReaction) {
+      return;
+    }
+
+    await productReactionRepository.remove(productReaction);
   }
 }
