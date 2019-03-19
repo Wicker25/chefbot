@@ -54,6 +54,7 @@ export const dailyPullCatalogue = functions.pubsub
     await chefBot.handleEvent({
       type: 'app_mention',
       channel: configs.get('slack.mainChannel'),
+      ts: new Date().getTime() / 1000,
       text: 'show suggestions'
     });
 
