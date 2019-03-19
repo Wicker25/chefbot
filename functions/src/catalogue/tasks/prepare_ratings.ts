@@ -96,7 +96,7 @@ export const task = async () => {
 
       if (product.totalReviews) {
         product.rating =
-          (product.totalPositiveReviews / product.totalReviews) * 5.0;
+          1 + (product.totalPositiveReviews / product.totalReviews) * 4.0;
       }
 
       await productRepository.save(product);

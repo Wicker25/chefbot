@@ -40,7 +40,9 @@ export class ShowSuggestionsCommandHandler extends EventHandler {
     const products = await productRepository
       .createQueryBuilder('product')
       .innerJoinAndSelect('product.restaurant', 'restaurant')
-      .where('product.rating > 0 AND product.availableOn = CURRENT_DATE()')
+      .where(
+        'product.totalReviews > 0 AND product.availableOn = CURRENT_DATE()'
+      )
       .orderBy('product.rating', 'DESC')
       .limit(10)
       .getMany();
