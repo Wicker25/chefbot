@@ -27,6 +27,7 @@ import { configs, getConnection } from '@puro/core';
 import { ExecutionInterruptedException } from './EventHandler';
 
 import { HelpCommandHandler } from './HelpCommandHandler';
+import { PullCatalogueCommandHandler } from './PullCatalogueCommandHandler';
 import { ShowSuggestionsCommandHandler } from './ShowSuggestionsCommandHandler';
 import { ShowCommandHandler } from './ShowCommandHandler';
 import { RateCommandHandler } from './RateCommandHandler';
@@ -42,6 +43,7 @@ export class ChefBot {
 
   private registeredHandlers = [
     HelpCommandHandler,
+    PullCatalogueCommandHandler,
     ShowSuggestionsCommandHandler,
     ShowCommandHandler,
     RateCommandHandler,
