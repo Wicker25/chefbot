@@ -48,6 +48,11 @@ export class ShowSuggestionsCommandHandler extends EventHandler {
       .getMany();
 
     if (!products.length) {
+      await this.postMessage({
+        channel: channel,
+        text: 'I don’t have any suggestions for today!'
+      });
+
       return;
     }
 
