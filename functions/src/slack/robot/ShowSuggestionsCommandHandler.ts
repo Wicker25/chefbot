@@ -76,13 +76,7 @@ export class ShowSuggestionsCommandHandler extends EventHandler {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text:
-          `*${product.name} by ${product.restaurant.name}*\n` +
-          `${':star:'.repeat(product.rating)} ` +
-          `${product.totalReviews} reviews ~ ` +
-          `:stopwatch: ${product.totalDelayed} ~ ` +
-          `:snowflake: ${product.totalCold}\n` +
-          `${product.description}`
+        text: this.createProductMessage(product)
       }
     };
 

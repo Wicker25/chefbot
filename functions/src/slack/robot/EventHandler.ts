@@ -57,6 +57,10 @@ export abstract class EventHandler {
 
   abstract async execute(): Promise<void>;
 
+  protected async postMessage(message: any) {
+    return this.client.chat.postMessage(message);
+  }
+
   protected async getUser(userId: string) {
     const response = await this.client.users.info({ user: userId });
     return (response as any).user;
@@ -91,6 +95,17 @@ export abstract class EventHandler {
     return productRepository.save(product);
   }
 
+  protected createProductMessage(product: Product) {
+    return (
+      `*${product.name} by ${product.restaurant.name}*\n` +
+      `${':star:'.repeat(product.rating)}` +
+      `${product.totalReviews} votes` +
+      (product.totalDelayed ? ` ~ :stopwatch: ${product.totalDelayed}` : '') +
+      (product.totalCold ? ` ~ :snowflake: ${product.totalCold}` : '') +
+      `\n${product.description}`
+    );
+  }
+
   protected async downloadFile(outStream: Writable, fileUrl: string) {
     const accessToken = configs.get('slack.accessToken');
 
@@ -107,9 +122,5 @@ export abstract class EventHandler {
       outStream.on('finish', resolve);
       outStream.on('error', reject);
     });
-  }
-
-  protected async postMessage(message: any) {
-    return this.client.chat.postMessage(message);
   }
 }
