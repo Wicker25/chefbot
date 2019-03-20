@@ -26,6 +26,8 @@ import { configs, getRepository } from '@puro/core';
 
 import { Product } from '../entities/Product';
 
+import { Raw } from 'typeorm';
+
 import * as algoliasearch from 'algoliasearch';
 
 export class NoResultsException extends Error {}
@@ -65,7 +67,9 @@ export class SearchEngine {
 
   async reindex() {
     const productRepository = await getRepository(Product);
-    const products = await productRepository.find();
+    const products = await productRepository.find({
+      availableOn: Raw(alias => `${alias} = CURRENT_DATE()`)
+    });
 
     const productObjects = products.map((product: Product) =>
       this.createProductObject(product)
