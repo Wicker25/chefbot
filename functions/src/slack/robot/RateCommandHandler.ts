@@ -32,13 +32,13 @@ import { EventHandler } from './EventHandler';
 export class RateCommandHandler extends EventHandler {
   static testEvent(event: any) {
     const { type, text } = event;
-    return type === 'app_mention' && text.match(/rate\s+(.*)?/gi);
+    return type === 'app_mention' && text.match(/\brate\s+(.*)?/gi);
   }
 
   async execute() {
     const { channel, ts, user: userId, text, files } = this.event;
 
-    const [command, description] = /rate\s+(.*)?/gi.exec(text) as string[];
+    const [command, description] = /\brate\s+(.*)?/gi.exec(text) as string[];
 
     const product = await this.searchProduct(description);
     const user = await this.getUser(userId);

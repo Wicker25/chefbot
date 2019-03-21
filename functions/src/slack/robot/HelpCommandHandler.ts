@@ -27,7 +27,7 @@ import { EventHandler } from './EventHandler';
 export class HelpCommandHandler extends EventHandler {
   static testEvent(event: any) {
     const { type, text } = event;
-    return type === 'app_mention' && text.match(/help\s*/gi);
+    return type === 'app_mention' && text.match(/\bhelp\s*/gi);
   }
 
   async execute() {

@@ -27,13 +27,13 @@ import { EventHandler } from './EventHandler';
 export class ShowCommandHandler extends EventHandler {
   static testEvent(event: any) {
     const { type, text } = event;
-    return type === 'app_mention' && text.match(/show\s+(.*)?/gi);
+    return type === 'app_mention' && text.match(/\bshow\s+(.*)?/gi);
   }
 
   async execute() {
     const { channel, text } = this.event;
 
-    const [command, description] = /show\s+(.*)?/gi.exec(text) as string[];
+    const [command, description] = /\bshow\s+(.*)?/gi.exec(text) as string[];
 
     const product = await this.searchProduct(description);
 
