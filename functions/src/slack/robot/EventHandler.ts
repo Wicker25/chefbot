@@ -98,7 +98,7 @@ export abstract class EventHandler {
   protected createProductMessage(product: Product) {
     return (
       `*${product.name} by ${product.restaurant.name}*\n` +
-      `${':star:'.repeat(product.rating)}` +
+      `${':star:'.repeat(product.rating)} ` +
       `${product.totalReviews} votes` +
       (product.totalDelayed ? ` ~ :stopwatch: ${product.totalDelayed}` : '') +
       (product.totalCold ? ` ~ :snowflake: ${product.totalCold}` : '') +
