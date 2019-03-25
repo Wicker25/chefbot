@@ -44,6 +44,7 @@ export class ShowSuggestionsCommandHandler extends EventHandler {
         'product.totalReviews > 0 AND product.availableOn = CURRENT_DATE()'
       )
       .orderBy('product.rating', 'DESC')
+      .addOrderBy('product.totalReviews', 'DESC')
       .limit(10)
       .getMany();
 
