@@ -34,8 +34,6 @@ export class ShowSuggestionsCommandHandler extends EventHandler {
   }
 
   async execute() {
-    const { channel } = this.event;
-
     const productRepository = await getRepository(Product);
     const products = await productRepository
       .createQueryBuilder('product')
@@ -50,15 +48,12 @@ export class ShowSuggestionsCommandHandler extends EventHandler {
 
     if (!products.length) {
       await this.postMessage({
-        channel: channel,
         text: 'I don’t have any suggestions for today!'
       });
-
       return;
     }
 
     await this.postMessage({
-      channel: channel,
       blocks: [
         {
           type: 'section',

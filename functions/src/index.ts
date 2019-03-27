@@ -22,12 +22,13 @@
  * SOFTWARE.
  */
 
-import { Puro, configs } from '@puro/core';
+import { Puro, Server, configs } from '@puro/core';
 import { CataloguePlugin } from './catalogue/plugin';
 import { SlackPlugin } from './slack/plugin';
 
 import * as functions from 'firebase-functions';
 
+// Loads the configuration from Firebase
 const config = functions.config();
 process.env.PURO_PARAMS = Buffer.from(config.puro.params, 'base64').toString();
 

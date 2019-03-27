@@ -23,6 +23,7 @@
  */
 
 import { configs, getConnection } from '@puro/core';
+import { BadRequestHttpException } from '@puro/core';
 
 import { ExecutionInterruptedException } from './EventHandler';
 
@@ -31,6 +32,8 @@ import { PullCatalogueCommandHandler } from './PullCatalogueCommandHandler';
 import { ShowSuggestionsCommandHandler } from './ShowSuggestionsCommandHandler';
 import { ShowCommandHandler } from './ShowCommandHandler';
 import { RateCommandHandler } from './RateCommandHandler';
+import { ShowCallbackHandler } from './ShowCallbackHandler';
+import { RateCallbackHandler } from './RateCallbackHandler';
 import { ReactionAddedHandler } from './ReactionAddedHandler';
 import { ReactionRemovedHandler } from './ReactionRemovedHandler';
 
@@ -39,14 +42,16 @@ import { QueryFailedError } from 'typeorm';
 import { WebClient } from '@slack/client';
 
 export class ChefBot {
-  private client: WebClient;
+  public client: WebClient;
 
-  private registeredHandlers = [
+  protected registeredHandlers = [
     HelpCommandHandler,
     PullCatalogueCommandHandler,
     ShowSuggestionsCommandHandler,
     ShowCommandHandler,
     RateCommandHandler,
+    ShowCallbackHandler,
+    RateCallbackHandler,
     ReactionAddedHandler,
     ReactionRemovedHandler
   ];
@@ -61,9 +66,11 @@ export class ChefBot {
 
       if (registeredHandler.testEvent(event)) {
         await this.execEventHandler(event, registeredHandler);
-        break;
+        return;
       }
     }
+
+    throw new BadRequestHttpException();
   }
 
   private async execEventHandler(event: any, handlerClass: any) {
@@ -81,7 +88,7 @@ export class ChefBot {
           .execute();
       }
 
-      const handler = new handlerClass(this.client, event);
+      const handler = new handlerClass(this, event);
       await handler.execute();
     } catch (e) {
       if (

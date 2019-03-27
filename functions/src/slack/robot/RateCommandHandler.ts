@@ -40,14 +40,21 @@ export class RateCommandHandler extends EventHandler {
 
     const [command, description] = /\brate\s+(.*)?/gi.exec(text) as string[];
 
-    const product = await this.searchProduct(description);
+    const products = await this.searchProducts(description);
+
+    if (products.length > 1) {
+      await this.postProductMenu(products, 'rate_callback');
+      return;
+    }
+
+    const product = products[0];
     const user = await this.getUser(userId);
 
     if (files) {
       await this.updateProductImage(product, files[0]);
 
       // Thank the user for the picture
-      await this.client.reactions.add({
+      await this.addReaction({
         name: 'thankyou',
         channel,
         timestamp: ts
@@ -55,7 +62,6 @@ export class RateCommandHandler extends EventHandler {
     }
 
     const response = await this.postMessage({
-      channel: channel,
       text:
         'What do you think, folks? Did you try it too?\n' +
         ':+1: = I liked it! ~ ' +
@@ -67,7 +73,7 @@ export class RateCommandHandler extends EventHandler {
           color: '#36a64f',
           author_name: user.profile.real_name_normalized,
           author_icon: user.profile.image_original,
-          text,
+          text: `rate ${product.name}`,
           image_url: product.imageUrl
         }
       ]

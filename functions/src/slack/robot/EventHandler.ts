@@ -25,12 +25,8 @@
 import { configs, getRepository } from '@puro/core';
 
 import { Product } from '../../catalogue/entities/Product';
-
-import {
-  SearchEngine,
-  NoResultsException,
-  TooManyResultsException
-} from '../../catalogue/managers/SearchEngine';
+import { SearchEngine } from '../../catalogue/managers/SearchEngine';
+import { ChefBot } from './ChefBot';
 
 export class ExecutionInterruptedException extends Error {}
 
@@ -45,20 +41,57 @@ export abstract class EventHandler {
     return false;
   }
 
+  protected robot: ChefBot;
   protected client: WebClient;
   protected searchEngine: SearchEngine;
   protected event: any;
 
-  constructor(client: WebClient, event: any) {
-    this.client = client;
+  constructor(robot: ChefBot, event: any) {
+    this.robot = robot;
+    this.client = robot.client;
     this.searchEngine = new SearchEngine();
     this.event = event;
   }
 
   abstract async execute(): Promise<void>;
 
-  protected async postMessage(message: any) {
-    return this.client.chat.postMessage(message);
+  protected async postMessage(options: any) {
+    const { channel } = this.event;
+    return this.client.chat.postMessage(Object.assign({ channel }, options));
+  }
+
+  protected async postEphemeral(options: any) {
+    const { channel } = this.event;
+    return this.client.chat.postEphemeral(Object.assign({ channel }, options));
+  }
+
+  protected async postProductMenu(products: Product[], callbackId: string) {
+    const { channel, user: userId } = this.event;
+
+    await this.postEphemeral({
+      channel,
+      user: userId,
+      attachments: [
+        {
+          color: '#3aa3e3',
+          text: `<@${userId}>, which one of these dishes?`,
+          callback_id: callbackId,
+          actions: [
+            {
+              name: 'productId',
+              type: 'select',
+              options: products.map(product =>
+                this.createProductOption(product)
+              )
+            }
+          ]
+        }
+      ]
+    });
+  }
+
+  protected async addReaction(options: any) {
+    return this.client.reactions.add(options);
   }
 
   protected async getUser(userId: string) {
@@ -66,28 +99,21 @@ export abstract class EventHandler {
     return (response as any).user;
   }
 
-  protected async searchProduct(query: string): Promise<Product> {
-    try {
-      return await this.searchEngine.searchProduct(query);
-    } catch (e) {
-      const { channel, user: userId } = this.event;
+  protected async searchProducts(query: string): Promise<Product[]> {
+    const products = await this.searchEngine.searchProduct(query);
 
-      if (e instanceof NoResultsException) {
-        await this.postMessage({
-          channel: channel,
-          text: `<@${userId}>, I couldn’t find any dish matching that description!`
-        });
-      } else if (e instanceof TooManyResultsException) {
-        await this.postMessage({
-          channel: channel,
-          text:
-            `<@${userId}>, there are too many dishes matching that ` +
-            `description! Be more specific!`
-        });
-      }
-
-      throw new ExecutionInterruptedException();
+    if (products.length) {
+      return products;
     }
+
+    const { channel, user: userId } = this.event;
+
+    await this.postMessage({
+      channel: channel,
+      text: `<@${userId}>, I couldn’t find any dish matching that description!`
+    });
+
+    throw new ExecutionInterruptedException();
   }
 
   protected async saveProduct(product: Product) {
@@ -104,6 +130,11 @@ export abstract class EventHandler {
       (product.totalCold ? ` ~ :snowflake: ${product.totalCold}` : '') +
       `\n${product.description}`
     );
+  }
+
+  private createProductOption(product: Product) {
+    const restaurant = product.restaurant;
+    return { text: `${product.name} by ${restaurant.name}`, value: product.id };
   }
 
   protected async downloadFile(outStream: Writable, fileUrl: string) {

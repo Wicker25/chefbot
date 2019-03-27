@@ -25,7 +25,7 @@
     "apiKey": "apiKey"
   },
   "slack": {
-    "appID": "appID",
+    "appId": "appID",
     "verificationToken": "verificationToken",
     "accessToken": "accessToken",
     "mainChannel": "chefbot-channel"

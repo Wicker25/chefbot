@@ -22,34 +22,65 @@
  * SOFTWARE.
  */
 
-import { configs, Controller, Request, Response } from '@puro/core';
+import { configs } from '@puro/core';
+
+import {
+  Controller,
+  Request,
+  Response,
+  BadRequestHttpException,
+  AccessDeniedHttpException
+} from '@puro/core';
 
 import { ChefBot } from '../robot/ChefBot';
 
 export class EventController extends Controller {
   async create(request: Request, response: Response) {
+    // Interactive messages send data in a parameter `payload`
+    if (typeof request.bucket.payload !== 'undefined') {
+      request.bucket = JSON.parse(request.bucket.payload);
+    }
+
     const { type } = request.bucket;
 
     switch (type) {
       case 'url_verification': {
-        const { token, challenge } = request.bucket;
-
-        if (token == configs.get('slack.verificationToken')) {
-          response.send({ challenge });
-        }
-
+        this.verifyToken(request, response);
         break;
       }
 
       case 'event_callback': {
         const { event } = request.bucket;
-
-        const chefBot = new ChefBot();
-        await chefBot.handleEvent(event);
-
-        response.send('Ok');
+        await this.handleEvent(event);
         break;
       }
+
+      case 'interactive_message': {
+        await this.handleEvent(request.bucket);
+        response.send('Got it! :ok_hand:');
+        break;
+      }
+
+      default: {
+        throw new BadRequestHttpException();
+      }
     }
+
+    response.send('Ok');
+  }
+
+  private verifyToken(request: Request, response: Response) {
+    const { token, challenge } = request.bucket;
+
+    if (token != configs.get('slack.verificationToken')) {
+      throw new AccessDeniedHttpException();
+    }
+
+    response.send({ challenge });
+  }
+
+  private async handleEvent(event: any) {
+    const chefBot = new ChefBot();
+    await chefBot.handleEvent(event);
   }
 }

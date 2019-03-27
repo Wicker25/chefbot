@@ -31,14 +31,20 @@ export class ShowCommandHandler extends EventHandler {
   }
 
   async execute() {
-    const { channel, text } = this.event;
+    const { user: userId, text } = this.event;
 
     const [command, description] = /\bshow\s+(.*)?/gi.exec(text) as string[];
 
-    const product = await this.searchProduct(description);
+    const products = await this.searchProducts(description);
+
+    if (products.length > 1) {
+      await this.postProductMenu(products, 'show_callback');
+      return;
+    }
+
+    const product = products[0];
 
     await this.postMessage({
-      channel: channel,
       text: 'Here is',
       attachments: [
         {

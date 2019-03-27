@@ -31,10 +31,7 @@ export class HelpCommandHandler extends EventHandler {
   }
 
   async execute() {
-    const { channel } = this.event;
-
     await this.postMessage({
-      channel: channel,
       text:
         '_All commands_\n\n' +
         '• *@chefbot show suggestions* - shows the suggestions for today;\n' +

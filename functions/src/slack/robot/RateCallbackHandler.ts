@@ -1,5 +1,5 @@
 /**
- * @file robot/PullCatalogueCommandHandler.ts
+ * @file robot/RateCallbackHandler.ts
  *
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
@@ -24,24 +24,23 @@
 
 import { EventHandler } from './EventHandler';
 
-import { CatalogueManager } from '../../catalogue/managers/CatalogueManager';
-import { SearchEngine } from '../../catalogue/managers/SearchEngine';
-
-export class PullCatalogueCommandHandler extends EventHandler {
+export class RateCallbackHandler extends EventHandler {
   static testEvent(event: any) {
-    const { type, text } = event;
-    return type === 'app_mention' && text.match(/\bpull\s+catalogue\s*/gi);
+    const { type, callback_id: callbackId } = event;
+    return type === 'interactive_message' && callbackId === 'rate_callback';
   }
 
   async execute() {
-    const manager = new CatalogueManager();
-    await manager.pullCatalogue();
+    const { channel, message_ts: ts, user, actions } = this.event;
 
-    const searchEngine = new SearchEngine();
-    await searchEngine.reindex();
+    const productId = actions[0].selected_options[0].value;
 
-    await this.postMessage({
-      text: 'The catalogue has been updated!'
+    await this.robot.handleEvent({
+      type: 'app_mention',
+      channel: channel.id,
+      user: user.id,
+      ts,
+      text: `rate ${productId}`
     });
   }
 }
