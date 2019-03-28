@@ -52,6 +52,7 @@ export class EventController extends Controller {
       case 'event_callback': {
         const { event } = request.bucket;
         await this.handleEvent(event);
+        response.send('Ok');
         break;
       }
 
@@ -65,8 +66,6 @@ export class EventController extends Controller {
         throw new BadRequestHttpException();
       }
     }
-
-    response.send('Ok');
   }
 
   private verifyToken(request: Request, response: Response) {
