@@ -22,25 +22,33 @@
  * SOFTWARE.
  */
 
+import { getRepository } from '@puro/core';
+
 import { EventHandler } from './EventHandler';
+import { UserRequest } from '../entities/UserRequest';
 
 export class ShowCallbackHandler extends EventHandler {
   static testEvent(event: any) {
     const { type, callback_id: callbackId } = event;
-    return type === 'interactive_message' && callbackId === 'show_callback';
+    return type === 'interactive_message' && callbackId.startsWith('show:');
   }
 
   async execute() {
-    const { channel, message_ts: ts, user, actions } = this.event;
+    const { callback_id: callbackId, actions } = this.event;
 
     const productId = actions[0].selected_options[0].value;
 
-    await this.robot.handleEvent({
-      type: 'app_mention',
-      channel: channel.id,
-      user: user.id,
-      ts,
-      text: `show ${productId}`
+    // Re-process the original request
+    const userRequestRepository = await getRepository(UserRequest);
+    const userRequest = await userRequestRepository.findOneOrFail({
+      callbackId
     });
+
+    await this.robot.handleEvent(
+      Object.assign({}, userRequest.data, {
+        text: `show ${productId}`
+      }),
+      true
+    );
   }
 }

@@ -60,12 +60,12 @@ export class ChefBot {
     this.client = new WebClient(configs.get('slack.accessToken'));
   }
 
-  async handleEvent(event: any) {
+  async handleEvent(event: any, force: boolean = false) {
     for (let i = 0; i < this.registeredHandlers.length; i++) {
       const registeredHandler = this.registeredHandlers[i];
 
       if (registeredHandler.testEvent(event)) {
-        await this.execEventHandler(event, registeredHandler);
+        await this.execEventHandler(event, registeredHandler, force);
         return;
       }
     }
@@ -73,18 +73,26 @@ export class ChefBot {
     throw new BadRequestHttpException();
   }
 
-  private async execEventHandler(event: any, handlerClass: any) {
+  private async execEventHandler(
+    event: any,
+    handlerClass: any,
+    force: boolean
+  ) {
     const { type, channel, ts } = event;
 
     try {
-      // Grant single access to the event
-      if (type === 'app_mention') {
+      // Make sure the request will be processed once
+      if (type === 'app_mention' && !force) {
         const connection = await getConnection();
         await connection
           .createQueryBuilder()
           .insert()
-          .into('handled_event')
-          .values({ id: `${type}:${channel}:${ts}`, createdOn: () => 'NOW()' })
+          .into('user_request')
+          .values({
+            id: `${type}:${channel}:${ts}`,
+            data: event,
+            createdOn: () => 'NOW()'
+          })
           .execute();
       }
 

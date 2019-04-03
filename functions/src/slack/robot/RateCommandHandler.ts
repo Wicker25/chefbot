@@ -27,6 +27,8 @@ import { getRepository } from '@puro/core';
 import { Product } from '../../catalogue/entities/Product';
 import { ProductSurvey } from '../../catalogue/entities/ProductSurvey';
 import { StorageManager } from '../../catalogue/managers/StorageManager';
+
+import { UserRequest } from '../entities/UserRequest';
 import { EventHandler } from './EventHandler';
 
 export class RateCommandHandler extends EventHandler {
@@ -36,14 +38,24 @@ export class RateCommandHandler extends EventHandler {
   }
 
   async execute() {
-    const { channel, ts, user: userId, text, files } = this.event;
+    const { type, channel, ts, user: userId, text, files } = this.event;
 
     const [command, description] = /\brate\s+(.*)?/gi.exec(text) as string[];
 
     const products = await this.searchProducts(description);
 
     if (products.length > 1) {
-      await this.postProductMenu(products, 'rate_callback');
+      const callbackId = `rate:${ts}`;
+      await this.postProductMenu(products, callbackId);
+
+      // Associate the request to the callback
+      const userRequestRepository = await getRepository(UserRequest);
+      const userRequest = await userRequestRepository.findOneOrFail({
+        id: `${type}:${channel}:${ts}`
+      });
+
+      userRequest.callbackId = callbackId;
+      await userRequestRepository.save(userRequest);
       return;
     }
 
@@ -73,13 +85,13 @@ export class RateCommandHandler extends EventHandler {
           color: '#36a64f',
           author_name: user.profile.real_name_normalized,
           author_icon: user.profile.image_original,
-          text: `rate ${product.name}`,
+          text: product.name,
           image_url: product.imageUrl
         }
       ]
     });
 
-    const { channel: surveyChannel, ts: surveyTs } = response as any;
+    const { channel: surveyChannel, ts: surveyTs } = response;
 
     const productSurveyRepository = await getRepository(ProductSurvey);
 

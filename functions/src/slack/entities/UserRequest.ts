@@ -1,5 +1,5 @@
 /**
- * @file entities/HandledEvent.ts
+ * @file entities/UserRequest.ts
  * Copyright (C) 2019 | Giacomo Trudu aka `Wicker25`
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,9 +24,15 @@
 import { Entity, Column, BeforeInsert, PrimaryColumn } from 'typeorm';
 
 @Entity()
-export class HandledEvent {
+export class UserRequest {
   @PrimaryColumn({ length: 64 })
   id!: string;
+
+  @Column('simple-json')
+  data!: any;
+
+  @Column({ length: 64, nullable: true })
+  callbackId!: string;
 
   @Column()
   createdOn!: Date;

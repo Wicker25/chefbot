@@ -22,6 +22,9 @@
  * SOFTWARE.
  */
 
+import { getRepository } from '@puro/core';
+
+import { UserRequest } from '../entities/UserRequest';
 import { EventHandler } from './EventHandler';
 
 export class ShowCommandHandler extends EventHandler {
@@ -31,14 +34,24 @@ export class ShowCommandHandler extends EventHandler {
   }
 
   async execute() {
-    const { user: userId, text } = this.event;
+    const { type, channel, ts, text } = this.event;
 
     const [command, description] = /\bshow\s+(.*)?/gi.exec(text) as string[];
 
     const products = await this.searchProducts(description);
 
     if (products.length > 1) {
-      await this.postProductMenu(products, 'show_callback');
+      const callbackId = `show:${ts}`;
+      await this.postProductMenu(products, callbackId);
+
+      // Associate the request to the callback
+      const userRequestRepository = await getRepository(UserRequest);
+      const userRequest = await userRequestRepository.findOneOrFail({
+        id: `${type}:${channel}:${ts}`
+      });
+
+      userRequest.callbackId = callbackId;
+      await userRequestRepository.save(userRequest);
       return;
     }
 

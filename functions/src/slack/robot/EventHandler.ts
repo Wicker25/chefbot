@@ -55,12 +55,12 @@ export abstract class EventHandler {
 
   abstract async execute(): Promise<void>;
 
-  protected async postMessage(options: any) {
+  protected async postMessage(options: any): Promise<any> {
     const { channel } = this.event;
     return this.client.chat.postMessage(Object.assign({ channel }, options));
   }
 
-  protected async postEphemeral(options: any) {
+  protected async postEphemeral(options: any): Promise<any> {
     const { channel } = this.event;
     return this.client.chat.postEphemeral(Object.assign({ channel }, options));
   }
@@ -90,13 +90,13 @@ export abstract class EventHandler {
     });
   }
 
-  protected async addReaction(options: any) {
+  protected async addReaction(options: any): Promise<any> {
     return this.client.reactions.add(options);
   }
 
   protected async getUser(userId: string) {
-    const response = await this.client.users.info({ user: userId });
-    return (response as any).user;
+    const response = (await this.client.users.info({ user: userId })) as any;
+    return response.user;
   }
 
   protected async searchProducts(query: string): Promise<Product[]> {
