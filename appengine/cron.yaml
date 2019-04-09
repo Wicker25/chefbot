@@ -2,3 +2,4 @@ cron:
 - description: Daily job for ChefBot
   url: /publish/daily-job
   schedule: every mon,tue,wed,thu,fri 08:00
+  timezone: Europe/Dublin
