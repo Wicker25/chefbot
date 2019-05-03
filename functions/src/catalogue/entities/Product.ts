@@ -56,6 +56,15 @@ export class Product {
   @Column({ default: 0 })
   rating!: number;
 
+  @Column({ type: 'int', nullable: true })
+  energy!: number;
+
+  @Column({ length: 32, nullable: true })
+  allergens!: string;
+
+  @Column({ length: 32 })
+  legend!: string; // VG: Vegetarian, VE: Vegan, P: Pork
+
   @Column({ default: 0 })
   totalReviews!: number;
 

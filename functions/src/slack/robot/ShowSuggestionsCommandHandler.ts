@@ -27,6 +27,9 @@ import { getRepository } from '@puro/core';
 import { Product } from '../../catalogue/entities/Product';
 import { EventHandler } from './EventHandler';
 
+const PRODUCT_IMAGE_PLACEHOLDER_URL =
+  'https://storage.googleapis.com/chefbot-images/image-placeholder.png';
+
 export class ShowSuggestionsCommandHandler extends EventHandler {
   static testEvent(event: any) {
     const { type, text } = event;
@@ -53,6 +56,8 @@ export class ShowSuggestionsCommandHandler extends EventHandler {
       return;
     }
 
+    const topProduct: Product = products[0];
+
     await this.postMessage({
       blocks: [
         {
@@ -62,28 +67,42 @@ export class ShowSuggestionsCommandHandler extends EventHandler {
             text: 'Good morning, folks! Here is the Chef’s selection for today!'
           }
         },
+        { type: 'divider' },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: this.createProductMessage(topProduct)
+          }
+        },
+        {
+          type: 'image',
+          image_url: topProduct.imageUrl
+            ? topProduct.imageUrl
+            : PRODUCT_IMAGE_PLACEHOLDER_URL,
+          alt_text: topProduct.name
+        },
         { type: 'divider' }
-      ].concat(products.map(product => this.createProductSection(product)))
+      ].concat(
+        products.slice(1).map(product => this.createProductSection(product))
+      )
     });
   }
 
   private createProductSection(product: Product) {
-    const section: any = {
+    return {
       type: 'section',
       text: {
         type: 'mrkdwn',
         text: this.createProductMessage(product)
+      },
+      accessory: {
+        type: 'image',
+        image_url: product.imageUrl
+          ? product.imageUrl
+          : PRODUCT_IMAGE_PLACEHOLDER_URL,
+        alt_text: 'product picture'
       }
     };
-
-    if (product.imageUrl) {
-      section.accessory = {
-        type: 'image',
-        image_url: product.imageUrl,
-        alt_text: 'product picture'
-      };
-    }
-
-    return section;
   }
 }

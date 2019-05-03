@@ -32,6 +32,59 @@ import { Catalogue } from '../../lunch-team/models/Catalogue';
 import { Restaurant as RestaurantModel } from '../../lunch-team/models/Restaurant';
 import { Product as ProductModel } from '../../lunch-team/models/Product';
 
+// prettier-ignore
+const ALLERGEN_RE =
+  '(' +
+  [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+    'g', 'cr', 'e', 'f', 'p', 's', 'd', 'n', 'c', 'm', 'ss', 'sd', 'l', 'ml',
+    'gluten', 'cereal', 'wheat', 'crustaceans', 'eggs', 'fish', 'peanuts',
+    'soybeans', 'milk', 'nuts', 'almonds', 'hazelnuts', 'walnuts', 'cashews',
+    'celery', 'mustard', 'sesame', 'sulphur', 'lupin', 'molluscs',
+  ].join('|') + ')';
+
+// prettier-ignore
+const ALLERGEN_MAP: { [key: string]: number } = {
+  g: 1, cr: 2, e: 3, f: 4, p: 5, s: 6, d: 7,
+  n: 8, c: 9, m: 10, ss: 11, sd: 12, l: 13, ml: 14,
+  gluten: 1,
+  cereal: 1,
+  wheat: 1,
+  crustaceans: 2,
+  eggs: 3,
+  fish: 4,
+  peanuts: 5,
+  soybeans: 6,
+  milk: 7,
+  nuts: 8,
+  almonds: 8,
+  hazelnuts: 8,
+  walnuts: 8,
+  cashews: 8,
+  celery: 9,
+  mustard: 10,
+  sesame: 11,
+  sulphur: 12,
+  lupin: 13,
+  molluscs: 14
+};
+
+const PRODUCT_ENERGY_RE = /([0-9]+)\\s*[k]cal/gi;
+
+const PRODUCT_ALLERGENS_FMT1_RE = new RegExp(
+  `\((${ALLERGEN_RE}\\s*(,\\s*${ALLERGEN_RE})*)\)`,
+  'ig'
+);
+
+const PRODUCT_ALLERGENS_FMT2_RE = new RegExp(
+  `allergen\\s+(${ALLERGEN_RE}\\s*(,\\s*${ALLERGEN_RE})*)`,
+  'ig'
+);
+
+const PRODUCT_LEGENT_VEGETARIAN_RE = /(veggie|vegetarian)/gi;
+const PRODUCT_LEGENT_VEGAN_RE = /vegan/gi;
+const PRODUCT_LEGENT_PORK_RE = /pork/gi;
+
 export class CatalogueManager {
   private client: Client;
 
@@ -68,8 +121,9 @@ export class CatalogueManager {
       })) || new Restaurant();
 
     restaurant.lunchTeamId = restaurantModel.id;
-    restaurant.name = restaurantModel.name;
+    restaurant.name = this.normalizeText(restaurantModel.name);
     restaurant.address = restaurantModel.address;
+    restaurant.closeTime = restaurantModel.openingHour.closeHour;
 
     await productRestaurant.save(restaurant);
 
@@ -101,18 +155,74 @@ export class CatalogueManager {
       })) || new Product();
 
     product.lunchTeamId = productModel.id;
-    product.name = productModel.name;
-    product.description = productModel.description;
+    product.name = this.normalizeText(productModel.name);
+    product.description = this.normalizeText(productModel.description);
     product.restaurant = restaurant;
     product.availableOn = new Date();
 
-    this.normalizeProduct(product);
+    this.setProductEnergy(product, productModel);
+    this.setProductAllergens(product, productModel);
+    this.setProductLegend(product, productModel);
 
     await productRepository.save(product);
   }
 
-  private normalizeProduct(product: Product) {
-    product.name = product.name.trim();
-    product.description = product.description.trim();
+  private setProductEnergy(product: Product, productModel: ProductModel) {
+    const matches = PRODUCT_ENERGY_RE.exec(
+      `${productModel.name} ${productModel.description}`
+    );
+
+    if (matches) {
+      product.energy = parseInt(matches[1], 10);
+    }
+  }
+
+  private setProductAllergens(product: Product, productModel: ProductModel) {
+    const payload = `${productModel.name} ${productModel.description}`;
+
+    let matches = PRODUCT_ALLERGENS_FMT1_RE.exec(payload);
+
+    if (!matches) {
+      matches = PRODUCT_ALLERGENS_FMT2_RE.exec(payload);
+    }
+
+    if (matches) {
+      const allergens = matches[1]
+        .toLowerCase()
+        .split(/\s*,\s*/)
+        .map(allergen => this.normalizeAllergen(allergen));
+
+      product.allergens = allergens.join(',');
+    }
+  }
+
+  private setProductLegend(product: Product, productModel: ProductModel) {
+    const payload = `${productModel.name} ${productModel.description}`;
+
+    if (PRODUCT_LEGENT_VEGAN_RE.test(payload)) {
+      product.legend = 'VE';
+    } else if (PRODUCT_LEGENT_VEGETARIAN_RE.test(payload)) {
+      product.legend = 'VG';
+    } else if (PRODUCT_LEGENT_PORK_RE.test(payload)) {
+      product.legend = 'P';
+    }
+  }
+
+  private normalizeText(text: string) {
+    return text
+      .replace(/\([^\)]*\)/g, '')
+      .replace(/\*/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  private normalizeAllergen(allergen: string) {
+    const normalizedAllergen = ALLERGEN_MAP[allergen];
+
+    if (normalizedAllergen) {
+      return normalizedAllergen;
+    }
+
+    return parseInt(allergen, 10);
   }
 }

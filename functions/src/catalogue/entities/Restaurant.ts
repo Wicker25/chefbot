@@ -42,4 +42,7 @@ export class Restaurant {
 
   @OneToMany(type => Product, product => product.restaurant)
   products!: Product[];
+
+  @Column({ length: 5, nullable: true })
+  closeTime!: string;
 }

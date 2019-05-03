@@ -42,6 +42,11 @@ export interface Restaurant {
   platter: boolean;
   statusReg: string; // TODO: figure out the symbols
   isOpen: false;
-  openingHour: object[];
+  openingHour: {
+    day: string;
+    openHour: string;
+    closeHour: string;
+    codeDay: 6;
+  };
   categoryType: ProductCategory[];
 }

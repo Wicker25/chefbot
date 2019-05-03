@@ -122,13 +122,24 @@ export abstract class EventHandler {
   }
 
   protected createProductMessage(product: Product) {
+    const productLegend = product.legend;
+    const restaurant = product.restaurant;
+
     return (
-      `*${product.name} by ${product.restaurant.name}*\n` +
+      `*${product.name} by ${restaurant.name}*\n` +
       `${':star:'.repeat(product.rating)} ` +
       `${product.totalReviews} votes` +
       (product.totalDelayed ? ` ~ :stopwatch: ${product.totalDelayed}` : '') +
       (product.totalCold ? ` ~ :snowflake: ${product.totalCold}` : '') +
-      `\n${product.description}`
+      `\n${product.description}\n` +
+      `:watch: *Until*: ${restaurant.closeTime}` +
+      (product.energy ? ` ~ :fire: *Energy*: ${product.energy} kcal` : '') +
+      (productLegend.includes('VG') ? ` ~ :herb: Vegetarian` : '') +
+      (productLegend.includes('VE') ? ` ~ :herb: Vegan` : '') +
+      (productLegend.includes('P') ? ` ~ :pig: Pork` : '') +
+      (product.allergens
+        ? ` ~ :peanuts: *Allergens*: ${product.allergens}`
+        : '')
     );
   }
 
