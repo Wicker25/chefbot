@@ -33,57 +33,61 @@ import { Restaurant as RestaurantModel } from '../../lunch-team/models/Restauran
 import { Product as ProductModel } from '../../lunch-team/models/Product';
 
 // prettier-ignore
-const ALLERGEN_RE =
+const ALLERGEN_CODE_RE =
   '(' +
   [
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
     'g', 'cr', 'e', 'f', 'p', 's', 'd', 'n', 'c', 'm', 'ss', 'sd', 'l', 'ml',
-    'gluten', 'cereal', 'wheat', 'crustaceans', 'eggs', 'fish', 'peanuts',
-    'soybeans', 'milk', 'nuts', 'almonds', 'hazelnuts', 'walnuts', 'cashews',
-    'celery', 'mustard', 'sesame', 'sulphur', 'lupin', 'molluscs',
+  ].join('|') + ')';
+
+// prettier-ignore
+const ALLERGEN_NAMES_RE =
+  '(' +
+  [
+    'gluten', 'cereal', 'wheat', 'crustaceans', 'crabs', 'lobsters', 'prawns',
+    'egg', 'eggs', 'fish', 'tuna', 'halibut', 'salmon', 'sashimi', 'peanuts',
+    'soybeans', 'milk', 'cheese', 'butter', 'yogurt', 'nuts', 'almonds',
+    'hazelnuts', 'walnuts', 'cashews', 'celery', 'mustard', 'sesame', 'sulphur',
+    'lupin', 'molluscs', 'mussels', 'octopus', 'scallops', 'oysters'
   ].join('|') + ')';
 
 // prettier-ignore
 const ALLERGEN_MAP: { [key: string]: number } = {
+  // Codes
   g: 1, cr: 2, e: 3, f: 4, p: 5, s: 6, d: 7,
   n: 8, c: 9, m: 10, ss: 11, sd: 12, l: 13, ml: 14,
-  gluten: 1,
-  cereal: 1,
-  wheat: 1,
-  crustaceans: 2,
-  eggs: 3,
-  fish: 4,
+  // Names
+  gluten: 1, cereal: 1, wheat: 1,
+  crustaceans: 2, crabs: 2, lobsters: 2, prawns: 2,
+  egg: 3, eggs: 3,
+  fish: 4, tuna: 4, halibut: 4, salmon: 4, sashimi: 4,
   peanuts: 5,
   soybeans: 6,
-  milk: 7,
-  nuts: 8,
-  almonds: 8,
-  hazelnuts: 8,
-  walnuts: 8,
-  cashews: 8,
+  milk: 7, cheese: 7, butter: 7, yogurt: 7,
+  nuts: 8, almonds: 8, hazelnuts: 8, walnuts: 8, cashews: 8,
   celery: 9,
   mustard: 10,
   sesame: 11,
   sulphur: 12,
   lupin: 13,
-  molluscs: 14
+  molluscs: 14, mussels: 14, octopus: 14, scallops: 14, oysters: 14,
 };
 
-const PRODUCT_ENERGY_RE = /([0-9]+)\\s*[k]cal/gi;
+const PRODUCT_ENERGY_RE = /\b([0-9]+)\\s*[k]cal\b/gi;
 
-const PRODUCT_ALLERGENS_FMT1_RE = new RegExp(
-  `\((${ALLERGEN_RE}\\s*(,\\s*${ALLERGEN_RE})*)\)`,
+const PRODUCT_ALLERGEN_CODES_RE = new RegExp(
+  `\\((${ALLERGEN_CODE_RE}\\s*?(,\\s*${ALLERGEN_CODE_RE})*)\\)`,
   'ig'
 );
 
-const PRODUCT_ALLERGENS_FMT2_RE = new RegExp(
-  `allergen\\s+(${ALLERGEN_RE}\\s*(,\\s*${ALLERGEN_RE})*)`,
+const PRODUCT_ALLERGEN_NAMES_RE = new RegExp(
+  `\\b${ALLERGEN_NAMES_RE}\\b`,
   'ig'
 );
 
-const PRODUCT_LEGENT_VEGETARIAN_RE = /(veggie|vegetarian)/gi;
-const PRODUCT_LEGENT_VEGAN_RE = /vegan/gi;
-const PRODUCT_LEGENT_PORK_RE = /pork/gi;
+const PRODUCT_LEGENT_VEGETARIAN_RE = /\b(veggie|vegetarian)\b/i;
+const PRODUCT_LEGENT_VEGAN_RE = /\bvegan\b/i;
+const PRODUCT_LEGENT_PORK_RE = /\bpork\b/i;
 
 export class CatalogueManager {
   private client: Client;
@@ -174,25 +178,32 @@ export class CatalogueManager {
 
     if (matches) {
       product.energy = parseInt(matches[1], 10);
+    } else {
+      product.energy = 0;
     }
   }
 
   private setProductAllergens(product: Product, productModel: ProductModel) {
-    const payload = `${productModel.name} ${productModel.description}`;
+    const payload = `${productModel.name} ${
+      productModel.description
+    }`.toLowerCase();
 
-    let matches = PRODUCT_ALLERGENS_FMT1_RE.exec(payload);
+    let matches: string[] | null = PRODUCT_ALLERGEN_CODES_RE.exec(payload);
 
-    if (!matches) {
-      matches = PRODUCT_ALLERGENS_FMT2_RE.exec(payload);
+    if (matches) {
+      matches = matches[1].split(/\s*,\s*/);
+    } else {
+      matches = payload.match(PRODUCT_ALLERGEN_NAMES_RE);
     }
 
     if (matches) {
-      const allergens = matches[1]
-        .toLowerCase()
-        .split(/\s*,\s*/)
-        .map(allergen => this.normalizeAllergen(allergen));
+      const allergens = matches.map(allergen =>
+        this.normalizeAllergen(allergen)
+      );
 
-      product.allergens = allergens.join(',');
+      product.allergens = [...new Set(allergens)].join(',');
+    } else {
+      product.allergens = '';
     }
   }
 
@@ -205,6 +216,8 @@ export class CatalogueManager {
       product.legend = 'VG';
     } else if (PRODUCT_LEGENT_PORK_RE.test(payload)) {
       product.legend = 'P';
+    } else {
+      product.legend = '';
     }
   }
 

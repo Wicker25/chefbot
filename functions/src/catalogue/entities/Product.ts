@@ -56,10 +56,10 @@ export class Product {
   @Column({ default: 0 })
   rating!: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int' })
   energy!: number;
 
-  @Column({ length: 32, nullable: true })
+  @Column({ length: 32 })
   allergens!: string;
 
   @Column({ length: 32 })
