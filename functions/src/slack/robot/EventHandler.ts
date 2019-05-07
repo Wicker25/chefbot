@@ -132,7 +132,7 @@ export abstract class EventHandler {
       (product.totalDelayed ? ` ~ :stopwatch: ${product.totalDelayed}` : '') +
       (product.totalCold ? ` ~ :snowflake: ${product.totalCold}` : '') +
       `\n${product.description}\n` +
-      `:watch: *Until*: ${restaurant.closeTime}` +
+      `:stopwatch: *Until*: ${restaurant.closeTime}` +
       (product.energy ? ` ~ :fire: *Energy*: ${product.energy} kcal` : '') +
       (productLegend.includes('VG') ? ` ~ :herb: Vegetarian` : '') +
       (productLegend.includes('VE') ? ` ~ :herb: Vegan` : '') +
