@@ -224,7 +224,7 @@ export class CatalogueManager {
   private normalizeText(text: string) {
     return text
       .replace(/\([^\)]*\)/g, '')
-      .replace(/\*/g, '')
+      .replace(/[*(),.]/g, '')
       .replace(/\s+/g, ' ')
       .trim();
   }
