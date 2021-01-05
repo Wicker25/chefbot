@@ -18,7 +18,7 @@
     "@puro/core": "0.1.0-alpha14",
     "@slack/client": "^4.10.0",
     "algoliasearch": "^3.32.0",
-    "axios": "^0.18.0",
+    "axios": "^0.21.1",
     "firebase-admin": "^7.0.0",
     "firebase-functions": "^2.1.0",
     "mysql": "^2.16.0",
