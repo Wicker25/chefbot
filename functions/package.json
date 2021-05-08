@@ -22,7 +22,7 @@
     "firebase-admin": "^7.0.0",
     "firebase-functions": "^2.1.0",
     "mysql": "^2.16.0",
-    "typeorm": "^0.2.9",
+    "typeorm": "^0.2.25",
     "typescript": "^3.1.6"
   },
   "devDependencies": {
